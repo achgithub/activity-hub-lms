@@ -24,7 +24,7 @@ func main() {
 	// Get socket path from environment or use default
 	socketPath := os.Getenv("SOCKET_PATH")
 	if socketPath == "" {
-		socketPath = "/tmp/activity-hub-lms.sock"
+		socketPath = "/tmp/activity-hub-lms-manager.sock"
 	}
 
 	// Remove existing socket if it exists
