@@ -219,7 +219,10 @@ const SetupTab: React.FC<SetupTabProps> = ({
                   <strong>{player.name}</strong>
                   <button
                     className="ah-btn-danger-sm"
-                    onClick={() => handleDeletePlayer(player.id)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleDeletePlayer(player.id);
+                    }}
                   >
                     Delete
                   </button>
@@ -305,7 +308,10 @@ const SetupTab: React.FC<SetupTabProps> = ({
                           <strong>{team.name}</strong>
                           <button
                             className="ah-btn-danger-sm"
-                            onClick={() => handleDeleteTeam(team.id, group.id)}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDeleteTeam(team.id, group.id);
+                            }}
                           >
                             Delete
                           </button>

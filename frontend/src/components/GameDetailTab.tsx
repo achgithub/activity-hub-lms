@@ -787,6 +787,57 @@ const GameDetailTab: React.FC<GameDetailTabProps> = ({
                                       setPickResults(newResults);
                                     };
 
+                                    // Get current result for this team (all picks should have same result)
+                                    const currentResult = teamPicks.length > 0 ? (pickResults[teamPicks[0].id] || teamPicks[0].result) : null;
+
+                                    // Helper function to get button style
+                                    const getButtonStyle = (resultType: string) => {
+                                      const isSelected = currentResult === resultType;
+                                      let backgroundColor = 'transparent';
+                                      let color = '#000';
+                                      let borderColor = '#cbd5e1';
+
+                                      if (isSelected) {
+                                        switch (resultType) {
+                                          case 'win':
+                                            backgroundColor = '#22c55e';
+                                            color = '#fff';
+                                            borderColor = '#16a34a';
+                                            break;
+                                          case 'loss':
+                                            backgroundColor = '#ef4444';
+                                            color = '#fff';
+                                            borderColor = '#dc2626';
+                                            break;
+                                          case 'draw':
+                                            backgroundColor = '#f97316';
+                                            color = '#fff';
+                                            borderColor = '#ea580c';
+                                            break;
+                                          case 'postponed':
+                                            if (gameDetail?.game.postponeAsWin) {
+                                              backgroundColor = '#22c55e';
+                                              color = '#fff';
+                                              borderColor = '#16a34a';
+                                            } else {
+                                              backgroundColor = '#ef4444';
+                                              color = '#fff';
+                                              borderColor = '#dc2626';
+                                            }
+                                            break;
+                                        }
+                                      }
+
+                                      return {
+                                        backgroundColor,
+                                        color,
+                                        borderColor,
+                                        borderWidth: '2px',
+                                        borderStyle: 'solid',
+                                        transition: 'all 0.2s ease',
+                                      };
+                                    };
+
                                     return (
                                       <div key={teamName} className="ah-card ah-flex-col gap-4">
                                         <div>
@@ -797,25 +848,29 @@ const GameDetailTab: React.FC<GameDetailTabProps> = ({
                                         </div>
                                         <div className="ah-flex-wrap gap-2">
                                           <button
-                                            className="flex-1 min-w-[100px] px-4 py-3 text-sm font-semibold border-2 rounded-md cursor-pointer uppercase"
+                                            className="flex-1 min-w-[100px] px-4 py-3 text-sm font-semibold rounded-md cursor-pointer uppercase"
+                                            style={getButtonStyle('win')}
                                             onClick={() => setTeamResult('win')}
                                           >
                                             Win
                                           </button>
                                           <button
-                                            className="flex-1 min-w-[100px] px-4 py-3 text-sm font-semibold border-2 rounded-md cursor-pointer uppercase"
+                                            className="flex-1 min-w-[100px] px-4 py-3 text-sm font-semibold rounded-md cursor-pointer uppercase"
+                                            style={getButtonStyle('loss')}
                                             onClick={() => setTeamResult('loss')}
                                           >
                                             Loss
                                           </button>
                                           <button
-                                            className="flex-1 min-w-[100px] px-4 py-3 text-sm font-semibold border-2 rounded-md cursor-pointer uppercase"
+                                            className="flex-1 min-w-[100px] px-4 py-3 text-sm font-semibold rounded-md cursor-pointer uppercase"
+                                            style={getButtonStyle('draw')}
                                             onClick={() => setTeamResult('draw')}
                                           >
                                             Draw
                                           </button>
                                           <button
-                                            className="flex-1 min-w-[100px] px-4 py-3 text-sm font-semibold border-2 rounded-md cursor-pointer uppercase"
+                                            className="flex-1 min-w-[100px] px-4 py-3 text-sm font-semibold rounded-md cursor-pointer uppercase"
+                                            style={getButtonStyle('postponed')}
                                             onClick={() => setTeamResult('postponed')}
                                           >
                                             Postponed

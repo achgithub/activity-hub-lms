@@ -141,8 +141,7 @@ function App() {
     <div style={{ width: '100%', maxWidth: '64rem', margin: '0 auto', padding: '2rem 1rem' }}>
       <div className="ah-card" style={{ height: 'calc(100vh - 10rem)', minHeight: '600px', maxHeight: '900px', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
         <div style={{ flex: '0 0 auto', padding: '1rem' }}>
-          <h1 className="ah-card-title">🎯 LMS Manager</h1>
-          <p className="ah-meta ah-mb-3">Manage Last Man Standing competitions</p>
+          <h2 style={{ fontSize: '1.5rem', fontWeight: '600', marginBottom: '1rem', color: '#000' }}>Manage Last Man Standing Competitions</h2>
 
           {/* Tabs */}
           <div className="ah-tabs">
