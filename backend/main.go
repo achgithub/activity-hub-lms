@@ -62,6 +62,10 @@ func main() {
 	r := mux.NewRouter()
 
 	// Public endpoints
+	r.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte("OK"))
+	}).Methods("GET")
 	r.HandleFunc("/api/config", HandleConfig).Methods("GET")
 
 	// Report endpoint (auth-only, no external access)
@@ -99,9 +103,9 @@ func main() {
 	r.Handle("/api/rounds/{roundId}/reopen", authMiddleware(http.HandlerFunc(HandleReopenRound))).Methods("POST")
 
 	// Serve static files (React build)
-	staticPath := getEnv("STATIC_PATH", "./static")
+	staticPath := getEnv("STATIC_PATH", "/home/andrew/activity-hub-lms/backend/static")
 	if _, err := os.Stat(staticPath); os.IsNotExist(err) {
-		log.Printf("Warning: Static directory not found at %s", staticPath)
+		log.Printf("⚠️  Warning: Static directory not found at %s", staticPath)
 	} else {
 		r.PathPrefix("/").Handler(http.FileServer(http.Dir(staticPath)))
 		log.Printf("📁 Serving static files from: %s", staticPath)
