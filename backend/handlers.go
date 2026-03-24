@@ -9,7 +9,7 @@ import (
 	"net/url"
 	"strconv"
 
-	authlib "github.com/achgithub/activity-hub-common/auth"
+	authlib "github.com/achgithub/activity-hub-auth"
 	"github.com/gorilla/mux"
 )
 
