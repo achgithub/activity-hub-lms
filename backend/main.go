@@ -32,11 +32,11 @@ func main() {
 		log.Fatalf("Failed to remove existing socket: %v", err)
 	}
 
-	// Get database configuration from environment
-	dbHost := getEnv("DB_HOST", "localhost")
+	// Get database configuration from environment (match Activity Hub defaults)
+	dbHost := getEnv("DB_HOST", "127.0.0.1")
 	dbPort := getEnv("DB_PORT", "5432")
-	dbUser := getEnv("DB_USER", "postgres")
-	dbPass := getEnv("DB_PASS", "")
+	dbUser := getEnv("DB_USER", "activityhub")
+	dbPass := getEnv("DB_PASS", "pubgames")
 	dbName := getEnv("DB_NAME", "activity_hub") // All LMS tables are in activity_hub DB
 
 	// Initialize database connection (single DB - activity_hub contains all tables)
