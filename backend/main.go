@@ -63,7 +63,9 @@ func main() {
 
 	// Public endpoints
 	r.HandleFunc("/api/config", HandleConfig).Methods("GET")
-	r.HandleFunc("/api/report/{gameId}", HandleGetReport).Methods("GET")
+
+	// Report endpoint (auth-only, no external access)
+	r.Handle("/api/report/{gameId}", authMiddleware(http.HandlerFunc(HandleGetReport))).Methods("GET")
 
 	// Setup endpoints (groups, teams, players)
 	r.Handle("/api/groups", authMiddleware(http.HandlerFunc(HandleListGroups))).Methods("GET")
