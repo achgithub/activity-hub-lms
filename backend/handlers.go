@@ -3,10 +3,8 @@ package main
 import (
 	"database/sql"
 	"encoding/json"
-	"fmt"
 	"log"
 	"net/http"
-	"net/url"
 	"strconv"
 
 	authlib "github.com/achgithub/activity-hub-auth"
