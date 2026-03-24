@@ -25,6 +25,11 @@ const SetupTab: React.FC<SetupTabProps> = ({
   const [newGroupName, setNewGroupName] = useState('');
   const [newPlayerName, setNewPlayerName] = useState('');
   const [newTeamName, setNewTeamName] = useState('');
+  const [confirmDialog, setConfirmDialog] = useState<{
+    show: boolean;
+    message: string;
+    onConfirm: () => void;
+  }>({ show: false, message: '', onConfirm: () => {} });
 
   // Player CRUD handlers
   const handleCreatePlayer = async () => {
@@ -50,20 +55,25 @@ const SetupTab: React.FC<SetupTabProps> = ({
   };
 
   const handleDeletePlayer = async (playerId: number) => {
-    if (!window.confirm('Delete this player?')) return;
+    setConfirmDialog({
+      show: true,
+      message: 'Delete this player?',
+      onConfirm: async () => {
+        setConfirmDialog({ show: false, message: '', onConfirm: () => {} });
+        try {
+          const res = await fetch(`${API_BASE}/api/players/${playerId}`, {
+            method: 'DELETE',
+            headers: { Authorization: `Bearer ${token}` },
+          });
 
-    try {
-      const res = await fetch(`${API_BASE}/api/players/${playerId}`, {
-        method: 'DELETE',
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
-      if (res.ok || res.status === 204) {
-        onPlayersChange();
-      }
-    } catch (err) {
-      console.error('Failed to delete player:', err);
-    }
+          if (res.ok || res.status === 204) {
+            onPlayersChange();
+          }
+        } catch (err) {
+          console.error('Failed to delete player:', err);
+        }
+      },
+    });
   };
 
   // Group CRUD handlers
@@ -90,24 +100,29 @@ const SetupTab: React.FC<SetupTabProps> = ({
   };
 
   const handleDeleteGroup = async (groupId: number) => {
-    if (!window.confirm('Delete this group? This will also delete all its teams.')) return;
+    setConfirmDialog({
+      show: true,
+      message: 'Delete this group? This will also delete all its teams.',
+      onConfirm: async () => {
+        setConfirmDialog({ show: false, message: '', onConfirm: () => {} });
+        try {
+          const res = await fetch(`${API_BASE}/api/groups/${groupId}`, {
+            method: 'DELETE',
+            headers: { Authorization: `Bearer ${token}` },
+          });
 
-    try {
-      const res = await fetch(`${API_BASE}/api/groups/${groupId}`, {
-        method: 'DELETE',
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
-      if (res.ok || res.status === 204) {
-        onGroupsChange();
-        delete groupTeams[groupId];
-        if (expandedGroup === groupId) {
-          setExpandedGroup(null);
+          if (res.ok || res.status === 204) {
+            onGroupsChange();
+            delete groupTeams[groupId];
+            if (expandedGroup === groupId) {
+              setExpandedGroup(null);
+            }
+          }
+        } catch (err) {
+          console.error('Failed to delete group:', err);
         }
-      }
-    } catch (err) {
-      console.error('Failed to delete group:', err);
-    }
+      },
+    });
   };
 
   const handleToggleGroup = async (groupId: number) => {
@@ -162,26 +177,31 @@ const SetupTab: React.FC<SetupTabProps> = ({
   };
 
   const handleDeleteTeam = async (teamId: number, groupId: number) => {
-    if (!window.confirm('Delete this team?')) return;
+    setConfirmDialog({
+      show: true,
+      message: 'Delete this team?',
+      onConfirm: async () => {
+        setConfirmDialog({ show: false, message: '', onConfirm: () => {} });
+        try {
+          const res = await fetch(`${API_BASE}/api/teams/${teamId}`, {
+            method: 'DELETE',
+            headers: { Authorization: `Bearer ${token}` },
+          });
 
-    try {
-      const res = await fetch(`${API_BASE}/api/teams/${teamId}`, {
-        method: 'DELETE',
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
-      if (res.ok || res.status === 204) {
-        // Refresh teams for this group
-        const teamsRes = await fetch(`${API_BASE}/api/groups/${groupId}/teams`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        const teamsData = await teamsRes.json();
-        setGroupTeams({ ...groupTeams, [groupId]: teamsData.teams || [] });
-        onGroupsChange();
-      }
-    } catch (err) {
-      console.error('Failed to delete team:', err);
-    }
+          if (res.ok || res.status === 204) {
+            // Refresh teams for this group
+            const teamsRes = await fetch(`${API_BASE}/api/groups/${groupId}/teams`, {
+              headers: { Authorization: `Bearer ${token}` },
+            });
+            const teamsData = await teamsRes.json();
+            setGroupTeams({ ...groupTeams, [groupId]: teamsData.teams || [] });
+            onGroupsChange();
+          }
+        } catch (err) {
+          console.error('Failed to delete team:', err);
+        }
+      },
+    });
   };
 
   return (
@@ -329,6 +349,45 @@ const SetupTab: React.FC<SetupTabProps> = ({
           </>
         )}
       </div>
+
+      {/* Confirmation Dialog */}
+      {confirmDialog.show && (
+        <div
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: 'rgba(0, 0, 0, 0.5)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 1000,
+          }}
+          onClick={() => setConfirmDialog({ show: false, message: '', onConfirm: () => {} })}
+        >
+          <div
+            className="ah-card"
+            style={{ maxWidth: '400px', margin: '1rem' }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3 className="ah-section-title">Confirm Delete</h3>
+            <p className="ah-meta mt-2">{confirmDialog.message}</p>
+            <div className="mt-4 flex gap-2 justify-end">
+              <button
+                className="ah-btn-outline"
+                onClick={() => setConfirmDialog({ show: false, message: '', onConfirm: () => {} })}
+              >
+                Cancel
+              </button>
+              <button className="ah-btn-danger" onClick={confirmDialog.onConfirm}>
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

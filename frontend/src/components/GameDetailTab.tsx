@@ -36,6 +36,11 @@ const GameDetailTab: React.FC<GameDetailTabProps> = ({
   const [playerSearchText, setPlayerSearchText] = useState<string>('');
   const [showUnassignedPlayersOnly, setShowUnassignedPlayersOnly] = useState<boolean>(false);
   const [revealedPlayers, setRevealedPlayers] = useState<Set<string>>(new Set());
+  const [confirmDialog, setConfirmDialog] = useState<{
+    show: boolean;
+    message: string;
+    onConfirm: () => void;
+  }>({ show: false, message: '', onConfirm: () => {} });
 
   useEffect(() => {
     const fetchGameDetail = async () => {
@@ -103,28 +108,31 @@ const GameDetailTab: React.FC<GameDetailTabProps> = ({
   const handleDeleteGame = async () => {
     if (!gameDetail || !token || !gameId) return;
 
-    if (!window.confirm(`Are you sure you want to delete "${gameDetail.game.name}"? This action cannot be undone.`)) {
-      return;
-    }
+    setConfirmDialog({
+      show: true,
+      message: `Are you sure you want to delete "${gameDetail.game.name}"? This action cannot be undone.`,
+      onConfirm: async () => {
+        setConfirmDialog({ show: false, message: '', onConfirm: () => {} });
+        try {
+          const res = await fetch(`${API_BASE}/api/games/${gameId}`, {
+            method: 'DELETE',
+            headers: { Authorization: `Bearer ${token}` },
+          });
 
-    try {
-      const res = await fetch(`${API_BASE}/api/games/${gameId}`, {
-        method: 'DELETE',
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
-      if (res.ok || res.status === 204) {
-        alert('Game deleted successfully');
-        onGamesChange();
-        handleBackToGamesList();
-      } else {
-        const error = await res.text();
-        alert(`Failed to delete game: ${error}`);
-      }
-    } catch (err) {
-      console.error('Failed to delete game:', err);
-      alert('Failed to delete game');
-    }
+          if (res.ok || res.status === 204) {
+            alert('Game deleted successfully');
+            onGamesChange();
+            handleBackToGamesList();
+          } else {
+            const error = await res.text();
+            alert(`Failed to delete game: ${error}`);
+          }
+        } catch (err) {
+          console.error('Failed to delete game:', err);
+          alert('Failed to delete game');
+        }
+      },
+    });
   };
 
   const handleAddPlayersToGame = async () => {
@@ -209,6 +217,39 @@ const GameDetailTab: React.FC<GameDetailTabProps> = ({
     }
   };
 
+  const doFinalizePicks = async (roundId: number) => {
+    try {
+      const res = await fetch(`${API_BASE}/api/rounds/${roundId}/finalize-picks`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+
+        // Refresh picks
+        const picksRes = await fetch(`${API_BASE}/api/rounds/${roundId}/picks`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const picksData = await picksRes.json();
+        setPicks(picksData.picks || []);
+        setPicksFinalized(true);
+
+        if (data.missingCount > 0) {
+          alert(`Picks finalized! Auto-assigned ${data.missingCount} player${data.missingCount > 1 ? 's' : ''}.`);
+        } else {
+          alert('All picks confirmed! Ready for results entry.');
+        }
+      } else {
+        const error = await res.text();
+        alert(`Failed to finalize picks: ${error}`);
+      }
+    } catch (err) {
+      console.error('Failed to finalize picks:', err);
+      alert('Failed to finalize picks');
+    }
+  };
+
   const handleFinalizePicks = async () => {
     if (!gameDetail || !token) return;
 
@@ -252,46 +293,21 @@ const GameDetailTab: React.FC<GameDetailTabProps> = ({
       const missingCount = activeParticipants.length - playersWithPicks;
 
       if (missingCount > 0) {
-        const confirmed = window.confirm(
-          `${missingCount} player${missingCount > 1 ? 's have' : ' has'} no pick assigned. Auto-assign next available team alphabetically?`
-        );
-        if (!confirmed) return;
+        setConfirmDialog({
+          show: true,
+          message: `${missingCount} player${missingCount > 1 ? 's have' : ' has'} no pick assigned. Auto-assign next available team alphabetically?`,
+          onConfirm: async () => {
+            setConfirmDialog({ show: false, message: '', onConfirm: () => {} });
+            await doFinalizePicks(latestRound.id);
+          },
+        });
+      } else {
+        await doFinalizePicks(latestRound.id);
       }
     } catch (err) {
       console.error('Failed to check picks:', err);
       alert('Failed to check picks');
       return;
-    }
-
-    try {
-      const res = await fetch(`${API_BASE}/api/rounds/${latestRound.id}/finalize-picks`, {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
-      if (res.ok) {
-        const data = await res.json();
-
-        // Refresh picks
-        const picksRes = await fetch(`${API_BASE}/api/rounds/${latestRound.id}/picks`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        const picksData = await picksRes.json();
-        setPicks(picksData.picks || []);
-        setPicksFinalized(true);
-
-        if (data.missingCount > 0) {
-          alert(`Picks finalized! Auto-assigned ${data.missingCount} player${data.missingCount > 1 ? 's' : ''}.`);
-        } else {
-          alert('All picks confirmed! Ready for results entry.');
-        }
-      } else {
-        const error = await res.text();
-        alert(`Failed to finalize picks: ${error}`);
-      }
-    } catch (err) {
-      console.error('Failed to finalize picks:', err);
-      alert('Failed to finalize picks');
     }
   };
 
@@ -340,20 +356,7 @@ const GameDetailTab: React.FC<GameDetailTabProps> = ({
     }
   };
 
-  const handleCloseRound = async () => {
-    if (!gameDetail || !token) return;
-
-    const latestRound = gameDetail.rounds[gameDetail.rounds.length - 1];
-    if (!latestRound) return;
-
-    // Check that all picks have results
-    const allPicksHaveResults = picks.every((pick) => pickResults[pick.id] || pick.result);
-    if (!allPicksHaveResults) {
-      if (!window.confirm('Not all picks have results. Close round anyway?')) {
-        return;
-      }
-    }
-
+  const doCloseRound = async (roundId: number) => {
     // Save any pending results first
     const resultsToSave = Object.entries(pickResults).map(([pickId, result]) => ({
       pickId: Number(pickId),
@@ -362,7 +365,7 @@ const GameDetailTab: React.FC<GameDetailTabProps> = ({
 
     if (resultsToSave.length > 0) {
       try {
-        await fetch(`${API_BASE}/api/rounds/${latestRound.id}/results`, {
+        await fetch(`${API_BASE}/api/rounds/${roundId}/results`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -379,7 +382,7 @@ const GameDetailTab: React.FC<GameDetailTabProps> = ({
 
     // Close the round via dedicated endpoint
     try {
-      const res = await fetch(`${API_BASE}/api/rounds/${latestRound.id}/close`, {
+      const res = await fetch(`${API_BASE}/api/rounds/${roundId}/close`, {
         method: 'POST',
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -401,6 +404,28 @@ const GameDetailTab: React.FC<GameDetailTabProps> = ({
     } catch (err) {
       console.error('Failed to close round:', err);
       alert('Failed to close round');
+    }
+  };
+
+  const handleCloseRound = async () => {
+    if (!gameDetail || !token) return;
+
+    const latestRound = gameDetail.rounds[gameDetail.rounds.length - 1];
+    if (!latestRound) return;
+
+    // Check that all picks have results
+    const allPicksHaveResults = picks.every((pick) => pickResults[pick.id] || pick.result);
+    if (!allPicksHaveResults) {
+      setConfirmDialog({
+        show: true,
+        message: 'Not all picks have results. Close round anyway?',
+        onConfirm: async () => {
+          setConfirmDialog({ show: false, message: '', onConfirm: () => {} });
+          await doCloseRound(latestRound.id);
+        },
+      });
+    } else {
+      await doCloseRound(latestRound.id);
     }
   };
 
@@ -933,6 +958,45 @@ const GameDetailTab: React.FC<GameDetailTabProps> = ({
             })()}
           </div>
         )}
+
+      {/* Confirmation Dialog */}
+      {confirmDialog.show && (
+        <div
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: 'rgba(0, 0, 0, 0.5)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 1000,
+          }}
+          onClick={() => setConfirmDialog({ show: false, message: '', onConfirm: () => {} })}
+        >
+          <div
+            className="ah-card"
+            style={{ maxWidth: '400px', margin: '1rem' }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3 className="ah-section-title">Confirm Action</h3>
+            <p className="ah-meta mt-2">{confirmDialog.message}</p>
+            <div className="mt-4 flex gap-2 justify-end">
+              <button
+                className="ah-btn-outline"
+                onClick={() => setConfirmDialog({ show: false, message: '', onConfirm: () => {} })}
+              >
+                Cancel
+              </button>
+              <button className="ah-btn-danger" onClick={confirmDialog.onConfirm}>
+                Confirm
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
