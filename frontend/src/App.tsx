@@ -139,7 +139,7 @@ function App() {
 
   return (
     <div className="ah-container ah-py-4" style={{ maxWidth: '64rem', margin: '0 auto' }}>
-      <div className="ah-card" style={{ maxHeight: 'calc(100vh - 12rem)', overflow: 'auto' }}>
+      <div className="ah-card" style={{ height: 'calc(100vh - 12rem)', minHeight: '600px', overflow: 'auto' }}>
         <h1 className="ah-card-title">🎯 LMS Manager</h1>
         <p className="ah-meta ah-mb-3">Manage Last Man Standing competitions</p>
 
