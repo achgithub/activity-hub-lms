@@ -1,10 +1,10 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { GameCard } from 'activity-hub-sdk';
 import SetupTab from './components/SetupTab';
 import GamesListTab from './components/GamesListTab';
 import GameDetailTab from './components/GameDetailTab';
 import ReportsTab from './components/ReportsTab';
-import { Game, Group, Player, GameDetail, Team, API_BASE } from './types';
+import { Game, Group, Player, Team, API_BASE } from './types';
 
 // Parse query params from URL
 function useQueryParams() {
@@ -12,14 +12,13 @@ function useQueryParams() {
     const params = new URLSearchParams(window.location.search);
     return {
       userId: params.get('userId'),
-      userName: params.get('userName') || 'Unknown',
       token: params.get('token'),
     };
   }, []);
 }
 
 function App() {
-  const { userId, userName, token } = useQueryParams();
+  const { userId, token } = useQueryParams();
   const [activeTab, setActiveTab] = useState<'setup' | 'games' | 'reports'>('games');
   const [selectedGameId, setSelectedGameId] = useState<number | null>(null);
 
@@ -27,7 +26,6 @@ function App() {
   const [groups, setGroups] = useState<Group[]>([]);
   const [players, setPlayers] = useState<Player[]>([]);
   const [games, setGames] = useState<Game[]>([]);
-  const [gameDetail, setGameDetail] = useState<GameDetail | null>(null);
   const [groupTeams, setGroupTeams] = useState<Record<number, Team[]>>({});
   const [collapsedCards, setCollapsedCards] = useState<Record<string, boolean>>({});
   const [loading, setLoading] = useState(true);
