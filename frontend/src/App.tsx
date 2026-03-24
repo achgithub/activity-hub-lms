@@ -138,37 +138,41 @@ function App() {
   }
 
   return (
-    <div className="ah-container ah-py-4" style={{ maxWidth: '64rem', margin: '0 auto' }}>
-      <div className="ah-card" style={{ height: 'calc(100vh - 12rem)', minHeight: '600px', overflow: 'auto' }}>
-        <h1 className="ah-card-title">🎯 LMS Manager</h1>
-        <p className="ah-meta ah-mb-3">Manage Last Man Standing competitions</p>
+    <div style={{ width: '100%', maxWidth: '64rem', margin: '0 auto', padding: '2rem 1rem' }}>
+      <div className="ah-card" style={{ height: 'calc(100vh - 10rem)', minHeight: '600px', maxHeight: '900px', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+        <div style={{ flex: '0 0 auto', padding: '1rem' }}>
+          <h1 className="ah-card-title">🎯 LMS Manager</h1>
+          <p className="ah-meta ah-mb-3">Manage Last Man Standing competitions</p>
 
-        {/* Tabs */}
-        <div className="ah-tabs">
-          <button
-            className={`ah-tab ${activeTab === 'setup' ? 'active' : ''}`}
-            onClick={() => setActiveTab('setup')}
-          >
-            Setup
-          </button>
-          <button
-            className={`ah-tab ${activeTab === 'games' ? 'active' : ''}`}
-            onClick={() => {
-              setActiveTab('games');
-              setSelectedGameId(null);
-            }}
-          >
-            Games
-          </button>
-          <button
-            className={`ah-tab ${activeTab === 'reports' ? 'active' : ''}`}
-            onClick={() => setActiveTab('reports')}
-          >
-            Reports
-          </button>
+          {/* Tabs */}
+          <div className="ah-tabs">
+            <button
+              className={`ah-tab ${activeTab === 'setup' ? 'active' : ''}`}
+              onClick={() => setActiveTab('setup')}
+            >
+              Setup
+            </button>
+            <button
+              className={`ah-tab ${activeTab === 'games' ? 'active' : ''}`}
+              onClick={() => {
+                setActiveTab('games');
+                setSelectedGameId(null);
+              }}
+            >
+              Games
+            </button>
+            <button
+              className={`ah-tab ${activeTab === 'reports' ? 'active' : ''}`}
+              onClick={() => setActiveTab('reports')}
+            >
+              Reports
+            </button>
+          </div>
         </div>
 
-        {/* Setup Tab */}
+        {/* Scrollable content area */}
+        <div style={{ flex: '1 1 auto', overflow: 'auto', padding: '1rem' }}>
+          {/* Setup Tab */}
         {activeTab === 'setup' && (
           <SetupTab
             groups={groups}
@@ -213,10 +217,11 @@ function App() {
           />
         )}
 
-        {/* Reports Tab */}
-        {activeTab === 'reports' && (
-          <ReportsTab games={games} token={token} />
-        )}
+          {/* Reports Tab */}
+          {activeTab === 'reports' && (
+            <ReportsTab games={games} token={token} />
+          )}
+        </div>
       </div>
     </div>
   );
