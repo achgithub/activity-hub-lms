@@ -37,7 +37,7 @@ func main() {
 	dbPort := getEnv("DB_PORT", "5432")
 	dbUser := getEnv("DB_USER", "activityhub")
 	dbPass := getEnv("DB_PASS", "pubgames")
-	dbName := getEnv("DB_NAME", "activity_hub") // All LMS tables are in activity_hub DB
+	dbName := getEnv("DB_NAME", "lms_manager") // LMS has its own database
 
 	// Initialize database connection (single DB - activity_hub contains all tables)
 	var err error
