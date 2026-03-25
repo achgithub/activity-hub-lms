@@ -95,6 +95,8 @@ const ReportsTab: React.FC<ReportsTabProps> = ({ games }) => {
               <button
                 className="ah-btn-outline"
                 onClick={() => {
+                  const token = localStorage.getItem('token');
+                  if (!token) return;
                   fetch(`${API_BASE}/api/report/${reportGameId}`, {
                     headers: { Authorization: `Bearer ${token}` },
                   })

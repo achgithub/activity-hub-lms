@@ -99,14 +99,14 @@ const GameDetailTab: React.FC<GameDetailTabProps> = ({
     };
 
     fetchGameDetail();
-  }, [gameId, token]);
+  }, [gameId]);
 
   const handleBackToGamesList = () => {
     onBack();
   };
 
   const handleDeleteGame = async () => {
-    if (!gameDetail || !token || !gameId) return;
+    if (!gameDetail || !gameId) return;
 
     setConfirmDialog({
       show: true,
@@ -136,7 +136,7 @@ const GameDetailTab: React.FC<GameDetailTabProps> = ({
   };
 
   const handleAddPlayersToGame = async () => {
-    if (!gameDetail || !token) return;
+    if (!gameDetail) return;
     if (playersToAdd.length === 0) {
       alert('Please select at least one player to add');
       return;
@@ -172,7 +172,7 @@ const GameDetailTab: React.FC<GameDetailTabProps> = ({
   };
 
   const handleSavePicks = async () => {
-    if (!gameDetail || !token) return;
+    if (!gameDetail) return;
 
     const latestRound = gameDetail.rounds[gameDetail.rounds.length - 1];
     if (!latestRound) return;
@@ -251,7 +251,7 @@ const GameDetailTab: React.FC<GameDetailTabProps> = ({
   };
 
   const handleFinalizePicks = async () => {
-    if (!gameDetail || !token) return;
+    if (!gameDetail) return;
 
     const latestRound = gameDetail.rounds[gameDetail.rounds.length - 1];
     if (!latestRound) return;
@@ -312,7 +312,7 @@ const GameDetailTab: React.FC<GameDetailTabProps> = ({
   };
 
   const handleSaveResults = async () => {
-    if (!gameDetail || !token) return;
+    if (!gameDetail) return;
 
     const latestRound = gameDetail.rounds[gameDetail.rounds.length - 1];
     if (!latestRound) return;
@@ -408,7 +408,7 @@ const GameDetailTab: React.FC<GameDetailTabProps> = ({
   };
 
   const handleCloseRound = async () => {
-    if (!gameDetail || !token) return;
+    if (!gameDetail) return;
 
     const latestRound = gameDetail.rounds[gameDetail.rounds.length - 1];
     if (!latestRound) return;
@@ -430,7 +430,7 @@ const GameDetailTab: React.FC<GameDetailTabProps> = ({
   };
 
   const handleAdvanceRound = async () => {
-    if (!gameDetail || !token) return;
+    if (!gameDetail) return;
 
     try {
       const res = await fetch(`${API_BASE}/api/games/${gameId}/advance`, {
