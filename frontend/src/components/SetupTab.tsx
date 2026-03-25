@@ -4,7 +4,6 @@ import { Group, Player, Team, API_BASE } from '../types';
 interface SetupTabProps {
   groups: Group[];
   players: Player[];
-  token: string;
   onGroupsChange: () => void;
   onPlayersChange: () => void;
   collapsedCards: Record<string, boolean>;
@@ -14,7 +13,6 @@ interface SetupTabProps {
 const SetupTab: React.FC<SetupTabProps> = ({
   groups,
   players,
-  token,
   onGroupsChange,
   onPlayersChange,
   collapsedCards,
@@ -34,6 +32,9 @@ const SetupTab: React.FC<SetupTabProps> = ({
   // Player CRUD handlers
   const handleCreatePlayer = async () => {
     if (!newPlayerName.trim()) return;
+
+    const token = localStorage.getItem('token');
+    if (!token) return;
 
     try {
       const res = await fetch(`${API_BASE}/api/players`, {
@@ -60,6 +61,9 @@ const SetupTab: React.FC<SetupTabProps> = ({
       message: 'Delete this player?',
       onConfirm: async () => {
         setConfirmDialog({ show: false, message: '', onConfirm: () => {} });
+        const token = localStorage.getItem('token');
+        if (!token) return;
+
         try {
           const res = await fetch(`${API_BASE}/api/players/${playerId}`, {
             method: 'DELETE',
@@ -79,6 +83,9 @@ const SetupTab: React.FC<SetupTabProps> = ({
   // Group CRUD handlers
   const handleCreateGroup = async () => {
     if (!newGroupName.trim()) return;
+
+    const token = localStorage.getItem('token');
+    if (!token) return;
 
     try {
       const res = await fetch(`${API_BASE}/api/groups`, {
@@ -105,6 +112,9 @@ const SetupTab: React.FC<SetupTabProps> = ({
       message: 'Delete this group? This will also delete all its teams.',
       onConfirm: async () => {
         setConfirmDialog({ show: false, message: '', onConfirm: () => {} });
+        const token = localStorage.getItem('token');
+        if (!token) return;
+
         try {
           const res = await fetch(`${API_BASE}/api/groups/${groupId}`, {
             method: 'DELETE',
@@ -135,6 +145,9 @@ const SetupTab: React.FC<SetupTabProps> = ({
 
     // Fetch teams if not already loaded
     if (!groupTeams[groupId]) {
+      const token = localStorage.getItem('token');
+      if (!token) return;
+
       try {
         const res = await fetch(`${API_BASE}/api/groups/${groupId}/teams`, {
           headers: { Authorization: `Bearer ${token}` },
@@ -150,6 +163,9 @@ const SetupTab: React.FC<SetupTabProps> = ({
   // Team CRUD handlers
   const handleCreateTeam = async (groupId: number) => {
     if (!newTeamName.trim()) return;
+
+    const token = localStorage.getItem('token');
+    if (!token) return;
 
     try {
       const res = await fetch(`${API_BASE}/api/groups/${groupId}/teams`, {
@@ -182,6 +198,9 @@ const SetupTab: React.FC<SetupTabProps> = ({
       message: 'Delete this team?',
       onConfirm: async () => {
         setConfirmDialog({ show: false, message: '', onConfirm: () => {} });
+        const token = localStorage.getItem('token');
+        if (!token) return;
+
         try {
           const res = await fetch(`${API_BASE}/api/teams/${teamId}`, {
             method: 'DELETE',

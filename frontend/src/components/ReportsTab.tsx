@@ -3,10 +3,9 @@ import { Game, API_BASE } from '../types';
 
 interface ReportsTabProps {
   games: Game[];
-  token: string;
 }
 
-const ReportsTab: React.FC<ReportsTabProps> = ({ games, token }) => {
+const ReportsTab: React.FC<ReportsTabProps> = ({ games }) => {
   const [reportGameId, setReportGameId] = useState<number>(0);
   const [reportRound, setReportRound] = useState<string>('all');
   const [reportData, setReportData] = useState<any>(null);
@@ -19,6 +18,9 @@ const ReportsTab: React.FC<ReportsTabProps> = ({ games, token }) => {
     }
 
     const fetchReport = async () => {
+      const token = localStorage.getItem('token');
+      if (!token) return;
+
       try {
         const res = await fetch(`${API_BASE}/api/report/${reportGameId}`, {
           headers: { Authorization: `Bearer ${token}` },
@@ -31,7 +33,7 @@ const ReportsTab: React.FC<ReportsTabProps> = ({ games, token }) => {
     };
 
     fetchReport();
-  }, [reportGameId, token]);
+  }, [reportGameId]);
 
   return (
     <div>

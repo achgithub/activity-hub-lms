@@ -1,26 +1,30 @@
-import { useState, useEffect, useMemo } from 'react';
-import { GameCard } from 'activity-hub-sdk';
+import { useState, useEffect } from 'react';
+import { GameCard, useActivityHubContext } from 'activity-hub-sdk';
 import SetupTab from './components/SetupTab';
 import GamesListTab from './components/GamesListTab';
 import GameDetailTab from './components/GameDetailTab';
 import ReportsTab from './components/ReportsTab';
 import { Game, Group, Player, Team, API_BASE } from './types';
 
-// Parse query params from URL
-function useQueryParams() {
-  return useMemo(() => {
-    const params = new URLSearchParams(window.location.search);
-    return {
-      userId: params.get('userId'),
-      token: params.get('token'),
-    };
-  }, []);
-}
+// Tab order defines privilege hierarchy (left = more privileges)
+const TAB_ORDER = ['setup', 'games', 'reports'] as const;
+type TabName = typeof TAB_ORDER[number];
 
 function App() {
-  const { userId, token } = useQueryParams();
-  const [activeTab, setActiveTab] = useState<'setup' | 'games' | 'reports'>('games');
+  const { user, roles } = useActivityHubContext();
   const [selectedGameId, setSelectedGameId] = useState<number | null>(null);
+
+  // Get accessible tabs based on user roles
+  // Tab hierarchy: setup (left) → games (middle) → reports (right)
+  // lms:setup grants access to all tabs
+  // lms:games grants access to games + reports
+  // lms:reports grants access to reports only (default role)
+  const accessibleTabs = roles.getAccessibleTabs([...TAB_ORDER]);
+
+  // Set active tab to first accessible tab
+  const [activeTab, setActiveTab] = useState<TabName>(() => {
+    return (accessibleTabs[0] as TabName) || 'reports';
+  });
 
   // Shared state
   const [groups, setGroups] = useState<Group[]>([]);
@@ -37,13 +41,28 @@ function App() {
     });
   };
 
-  // Must have userId and token
-  if (!userId || !token) {
+  // Check authentication
+  if (!user || user.isGuest) {
     return (
       <GameCard size="narrow">
         <h2 className="ah-card-title">🎯 LMS Manager</h2>
         <p className="ah-meta">
-          Missing authentication. Please access this app through the Activity Hub.
+          Authentication required. Please access this app through Activity Hub.
+        </p>
+      </GameCard>
+    );
+  }
+
+  // Check if user has any LMS role
+  if (accessibleTabs.length === 0) {
+    return (
+      <GameCard size="narrow">
+        <h2 className="ah-card-title">🎯 LMS Manager</h2>
+        <p className="ah-meta">
+          You don't have permission to access Last Man Standing.
+        </p>
+        <p className="ah-meta">
+          Contact an administrator to request access.
         </p>
       </GameCard>
     );
@@ -51,10 +70,11 @@ function App() {
 
   // Fetch initial data (groups, players)
   useEffect(() => {
-    if (!token) return;
-
     const fetchData = async () => {
       try {
+        const token = localStorage.getItem('token');
+        if (!token) return;
+
         // Fetch groups
         const groupsRes = await fetch(`${API_BASE}/api/groups`, {
           headers: { Authorization: `Bearer ${token}` },
@@ -77,14 +97,17 @@ function App() {
     };
 
     fetchData();
-  }, [token]);
+  }, []);
 
   // Fetch games when Games or Reports tab is active
   useEffect(() => {
-    if (!token || (activeTab !== 'games' && activeTab !== 'reports')) return;
+    if (activeTab !== 'games' && activeTab !== 'reports') return;
 
     const fetchGames = async () => {
       try {
+        const token = localStorage.getItem('token');
+        if (!token) return;
+
         const res = await fetch(`${API_BASE}/api/games`, {
           headers: { Authorization: `Bearer ${token}` },
         });
@@ -96,10 +119,11 @@ function App() {
     };
 
     fetchGames();
-  }, [token, activeTab]);
+  }, [activeTab]);
 
   // Reload data helpers
   const reloadGroups = async () => {
+    const token = localStorage.getItem('token');
     if (!token) return;
     const res = await fetch(`${API_BASE}/api/groups`, {
       headers: { Authorization: `Bearer ${token}` },
@@ -109,6 +133,7 @@ function App() {
   };
 
   const reloadPlayers = async () => {
+    const token = localStorage.getItem('token');
     if (!token) return;
     const res = await fetch(`${API_BASE}/api/players`, {
       headers: { Authorization: `Bearer ${token}` },
@@ -118,6 +143,7 @@ function App() {
   };
 
   const reloadGames = async () => {
+    const token = localStorage.getItem('token');
     if (!token) return;
     const res = await fetch(`${API_BASE}/api/games`, {
       headers: { Authorization: `Bearer ${token}` },
@@ -143,29 +169,35 @@ function App() {
         <div style={{ flex: '0 0 auto', padding: '1rem' }}>
           <h2 style={{ fontSize: '1.5rem', fontWeight: '600', marginBottom: '1rem', color: '#000' }}>Manage Last Man Standing Competitions</h2>
 
-          {/* Tabs */}
+          {/* Tabs - Only show accessible tabs based on role hierarchy */}
           <div className="ah-tabs">
-            <button
-              className={`ah-tab ${activeTab === 'setup' ? 'active' : ''}`}
-              onClick={() => setActiveTab('setup')}
-            >
-              Setup
-            </button>
-            <button
-              className={`ah-tab ${activeTab === 'games' ? 'active' : ''}`}
-              onClick={() => {
-                setActiveTab('games');
-                setSelectedGameId(null);
-              }}
-            >
-              Games
-            </button>
-            <button
-              className={`ah-tab ${activeTab === 'reports' ? 'active' : ''}`}
-              onClick={() => setActiveTab('reports')}
-            >
-              Reports
-            </button>
+            {accessibleTabs.includes('setup') && (
+              <button
+                className={`ah-tab ${activeTab === 'setup' ? 'active' : ''}`}
+                onClick={() => setActiveTab('setup')}
+              >
+                Setup
+              </button>
+            )}
+            {accessibleTabs.includes('games') && (
+              <button
+                className={`ah-tab ${activeTab === 'games' ? 'active' : ''}`}
+                onClick={() => {
+                  setActiveTab('games');
+                  setSelectedGameId(null);
+                }}
+              >
+                Games
+              </button>
+            )}
+            {accessibleTabs.includes('reports') && (
+              <button
+                className={`ah-tab ${activeTab === 'reports' ? 'active' : ''}`}
+                onClick={() => setActiveTab('reports')}
+              >
+                Reports
+              </button>
+            )}
           </div>
         </div>
 
@@ -176,7 +208,6 @@ function App() {
           <SetupTab
             groups={groups}
             players={players}
-            token={token}
             onGroupsChange={reloadGroups}
             onPlayersChange={reloadPlayers}
             collapsedCards={collapsedCards}
@@ -190,7 +221,6 @@ function App() {
             games={games}
             groups={groups}
             players={players}
-            token={token}
             onSelectGame={setSelectedGameId}
             onGamesChange={reloadGames}
             collapsedCards={collapsedCards}
@@ -202,7 +232,6 @@ function App() {
         {activeTab === 'games' && selectedGameId && (
           <GameDetailTab
             gameId={selectedGameId}
-            token={token}
             onBack={() => {
               setSelectedGameId(null);
               reloadGames();
@@ -218,7 +247,7 @@ function App() {
 
           {/* Reports Tab */}
           {activeTab === 'reports' && (
-            <ReportsTab games={games} token={token} />
+            <ReportsTab games={games} />
           )}
         </div>
       </div>

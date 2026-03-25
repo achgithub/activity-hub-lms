@@ -3,7 +3,6 @@ import { GameDetail, Pick, Team, API_BASE } from '../types';
 
 interface GameDetailTabProps {
   gameId: number;
-  token: string;
   onBack: () => void;
   groupTeams: Record<number, Team[]>;
   setGroupTeams: (teams: Record<number, Team[]>) => void;
@@ -15,7 +14,6 @@ interface GameDetailTabProps {
 
 const GameDetailTab: React.FC<GameDetailTabProps> = ({
   gameId,
-  token,
   onBack,
   groupTeams,
   setGroupTeams,
@@ -24,6 +22,8 @@ const GameDetailTab: React.FC<GameDetailTabProps> = ({
   players,
   onGamesChange,
 }) => {
+  // Helper to get token from localStorage
+  const getToken = () => localStorage.getItem('token') || '';
   const [gameDetail, setGameDetail] = useState<GameDetail | null>(null);
   const [picks, setPicks] = useState<Pick[]>([]);
   const [pickAssignments, setPickAssignments] = useState<Record<string, number>>({});
@@ -46,7 +46,7 @@ const GameDetailTab: React.FC<GameDetailTabProps> = ({
     const fetchGameDetail = async () => {
       try {
         const res = await fetch(`${API_BASE}/api/games/${gameId}`, {
-          headers: { Authorization: `Bearer ${token}` },
+          headers: { Authorization: `Bearer ${getToken()}` },
         });
         const data = await res.json();
         setGameDetail(data);
@@ -54,7 +54,7 @@ const GameDetailTab: React.FC<GameDetailTabProps> = ({
         // Fetch teams for the game's group if not already loaded
         if (data.game.groupId) {
           const teamsRes = await fetch(`${API_BASE}/api/groups/${data.game.groupId}/teams`, {
-            headers: { Authorization: `Bearer ${token}` },
+            headers: { Authorization: `Bearer ${getToken()}` },
           });
           const teamsData = await teamsRes.json();
           setGroupTeams({ ...groupTeams, [data.game.groupId]: teamsData.teams || [] });
@@ -62,7 +62,7 @@ const GameDetailTab: React.FC<GameDetailTabProps> = ({
 
         // Fetch used teams for this game
         const usedTeamsRes = await fetch(`${API_BASE}/api/games/${gameId}/used-teams`, {
-          headers: { Authorization: `Bearer ${token}` },
+          headers: { Authorization: `Bearer ${getToken()}` },
         });
         const usedTeamsData = await usedTeamsRes.json();
         setUsedTeams(usedTeamsData.usedTeams || {});
@@ -71,7 +71,7 @@ const GameDetailTab: React.FC<GameDetailTabProps> = ({
         if (data.rounds && data.rounds.length > 0) {
           const latestRound = data.rounds[data.rounds.length - 1];
           const picksRes = await fetch(`${API_BASE}/api/rounds/${latestRound.id}/picks`, {
-            headers: { Authorization: `Bearer ${token}` },
+            headers: { Authorization: `Bearer ${getToken()}` },
           });
           const picksData = await picksRes.json();
           setPicks(picksData.picks || []);
@@ -116,7 +116,7 @@ const GameDetailTab: React.FC<GameDetailTabProps> = ({
         try {
           const res = await fetch(`${API_BASE}/api/games/${gameId}`, {
             method: 'DELETE',
-            headers: { Authorization: `Bearer ${token}` },
+            headers: { Authorization: `Bearer ${getToken()}` },
           });
 
           if (res.ok || res.status === 204) {
@@ -147,7 +147,7 @@ const GameDetailTab: React.FC<GameDetailTabProps> = ({
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${getToken()}`,
         },
         body: JSON.stringify({ playerNames: playersToAdd }),
       });
@@ -155,7 +155,7 @@ const GameDetailTab: React.FC<GameDetailTabProps> = ({
       if (res.ok || res.status === 204) {
         // Refresh game detail
         const gameRes = await fetch(`${API_BASE}/api/games/${gameId}`, {
-          headers: { Authorization: `Bearer ${token}` },
+          headers: { Authorization: `Bearer ${getToken()}` },
         });
         const gameData = await gameRes.json();
         setGameDetail(gameData);
@@ -193,7 +193,7 @@ const GameDetailTab: React.FC<GameDetailTabProps> = ({
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${getToken()}`,
         },
         body: JSON.stringify({ picks: picksToSave }),
       });
@@ -201,7 +201,7 @@ const GameDetailTab: React.FC<GameDetailTabProps> = ({
       if (res.ok || res.status === 204) {
         // Refresh picks
         const picksRes = await fetch(`${API_BASE}/api/rounds/${latestRound.id}/picks`, {
-          headers: { Authorization: `Bearer ${token}` },
+          headers: { Authorization: `Bearer ${getToken()}` },
         });
         const picksData = await picksRes.json();
         setPicks(picksData.picks || []);
@@ -221,7 +221,7 @@ const GameDetailTab: React.FC<GameDetailTabProps> = ({
     try {
       const res = await fetch(`${API_BASE}/api/rounds/${roundId}/finalize-picks`, {
         method: 'POST',
-        headers: { Authorization: `Bearer ${token}` },
+        headers: { Authorization: `Bearer ${getToken()}` },
       });
 
       if (res.ok) {
@@ -229,7 +229,7 @@ const GameDetailTab: React.FC<GameDetailTabProps> = ({
 
         // Refresh picks
         const picksRes = await fetch(`${API_BASE}/api/rounds/${roundId}/picks`, {
-          headers: { Authorization: `Bearer ${token}` },
+          headers: { Authorization: `Bearer ${getToken()}` },
         });
         const picksData = await picksRes.json();
         setPicks(picksData.picks || []);
@@ -268,7 +268,7 @@ const GameDetailTab: React.FC<GameDetailTabProps> = ({
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`,
+            Authorization: `Bearer ${getToken()}`,
           },
           body: JSON.stringify({ picks: picksToSave }),
         });
@@ -282,7 +282,7 @@ const GameDetailTab: React.FC<GameDetailTabProps> = ({
     // Refresh picks to get current state
     try {
       const picksRes = await fetch(`${API_BASE}/api/rounds/${latestRound.id}/picks`, {
-        headers: { Authorization: `Bearer ${token}` },
+        headers: { Authorization: `Bearer ${getToken()}` },
       });
       const picksData = await picksRes.json();
       const currentPicks = picksData.picks || [];
@@ -333,7 +333,7 @@ const GameDetailTab: React.FC<GameDetailTabProps> = ({
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${getToken()}`,
         },
         body: JSON.stringify({ results: resultsToSave }),
       });
@@ -342,7 +342,7 @@ const GameDetailTab: React.FC<GameDetailTabProps> = ({
         alert('Results saved');
         // Refresh picks to show updated results
         const picksRes = await fetch(`${API_BASE}/api/rounds/${latestRound.id}/picks`, {
-          headers: { Authorization: `Bearer ${token}` },
+          headers: { Authorization: `Bearer ${getToken()}` },
         });
         const picksData = await picksRes.json();
         setPicks(picksData.picks || []);
@@ -369,7 +369,7 @@ const GameDetailTab: React.FC<GameDetailTabProps> = ({
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`,
+            Authorization: `Bearer ${getToken()}`,
           },
           body: JSON.stringify({ results: resultsToSave }),
         });
@@ -384,14 +384,14 @@ const GameDetailTab: React.FC<GameDetailTabProps> = ({
     try {
       const res = await fetch(`${API_BASE}/api/rounds/${roundId}/close`, {
         method: 'POST',
-        headers: { Authorization: `Bearer ${token}` },
+        headers: { Authorization: `Bearer ${getToken()}` },
       });
 
       if (res.ok || res.status === 204) {
         alert('Round closed');
         // Refresh game detail
         const gameRes = await fetch(`${API_BASE}/api/games/${gameId}`, {
-          headers: { Authorization: `Bearer ${token}` },
+          headers: { Authorization: `Bearer ${getToken()}` },
         });
         const gameData = await gameRes.json();
         setGameDetail(gameData);
@@ -435,7 +435,7 @@ const GameDetailTab: React.FC<GameDetailTabProps> = ({
     try {
       const res = await fetch(`${API_BASE}/api/games/${gameId}/advance`, {
         method: 'POST',
-        headers: { Authorization: `Bearer ${token}` },
+        headers: { Authorization: `Bearer ${getToken()}` },
       });
 
       if (res.ok) {
@@ -443,14 +443,14 @@ const GameDetailTab: React.FC<GameDetailTabProps> = ({
 
         // Refresh game detail
         const gameRes = await fetch(`${API_BASE}/api/games/${gameId}`, {
-          headers: { Authorization: `Bearer ${token}` },
+          headers: { Authorization: `Bearer ${getToken()}` },
         });
         const gameData = await gameRes.json();
         setGameDetail(gameData);
 
         // Refresh used teams (previous round is now closed)
         const usedTeamsRes = await fetch(`${API_BASE}/api/games/${gameId}/used-teams`, {
-          headers: { Authorization: `Bearer ${token}` },
+          headers: { Authorization: `Bearer ${getToken()}` },
         });
         const usedTeamsData = await usedTeamsRes.json();
         setUsedTeams(usedTeamsData.usedTeams || {});
@@ -459,7 +459,7 @@ const GameDetailTab: React.FC<GameDetailTabProps> = ({
         if (gameData.rounds && gameData.rounds.length > 0) {
           const latestRound = gameData.rounds[gameData.rounds.length - 1];
           const picksRes = await fetch(`${API_BASE}/api/rounds/${latestRound.id}/picks`, {
-            headers: { Authorization: `Bearer ${token}` },
+            headers: { Authorization: `Bearer ${getToken()}` },
           });
           const picksData = await picksRes.json();
           setPicks(picksData.picks || []);

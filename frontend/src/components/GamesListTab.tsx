@@ -5,7 +5,6 @@ interface GamesListTabProps {
   games: Game[];
   groups: Group[];
   players: Player[];
-  token: string;
   onSelectGame: (gameId: number) => void;
   onGamesChange: () => void;
   collapsedCards: Record<string, boolean>;
@@ -16,7 +15,6 @@ const GamesListTab: React.FC<GamesListTabProps> = ({
   games,
   groups,
   players,
-  token,
   onSelectGame,
   onGamesChange,
   collapsedCards,
@@ -87,6 +85,9 @@ const GamesListTab: React.FC<GamesListTabProps> = ({
     }
 
     setValidationErrors({});
+
+    const token = localStorage.getItem('token');
+    if (!token) return;
 
     try {
       const res = await fetch(`${API_BASE}/api/games`, {
