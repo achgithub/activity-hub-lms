@@ -62,64 +62,6 @@ function App() {
     }
   }, [accessibleTabs, activeTab]);
 
-  // SDK loading check - wait for user email to be populated
-  // CRITICAL: Must wait for SDK to fully load before rendering
-  if (!user || !user.email) {
-    return (
-      <div className="ah-container ah-container--narrow" style={{ marginTop: '2rem' }}>
-        <div className="ah-card">
-          <div className="ah-flex-center-justify" style={{ padding: '2rem' }}>
-            <p className="ah-meta">Loading SDK...</p>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // Data loading check
-  if (loading) {
-    return (
-      <div className="ah-container ah-container--narrow" style={{ marginTop: '2rem' }}>
-        <div className="ah-card">
-          <div className="ah-flex-center-justify" style={{ padding: '2rem' }}>
-            <p className="ah-meta">Loading data...</p>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // Check authentication
-  if (user.isGuest) {
-    return (
-      <div className="ah-container ah-container--narrow" style={{ marginTop: '2rem' }}>
-        <div className="ah-card">
-          <h2 style={{ marginBottom: '1rem' }}>🎯 LMS Manager</h2>
-          <p className="ah-meta">
-            Authentication required. Please access this app through Activity Hub.
-          </p>
-        </div>
-      </div>
-    );
-  }
-
-  // Check if user has any LMS role
-  if (accessibleTabs.length === 0) {
-    return (
-      <div className="ah-container ah-container--narrow" style={{ marginTop: '2rem' }}>
-        <div className="ah-card">
-          <h2 style={{ marginBottom: '1rem' }}>🎯 LMS Manager</h2>
-          <p className="ah-meta">
-            You don't have permission to access Last Man Standing.
-          </p>
-          <p className="ah-meta">
-            Contact an administrator to request access.
-          </p>
-        </div>
-      </div>
-    );
-  }
-
   // Fetch initial data (groups, players) - wait for SDK to load user first
   useEffect(() => {
     console.log('LMS: Data fetch effect triggered, user.email =', user.email);
@@ -203,6 +145,64 @@ function App() {
     fetchGames();
   }, [activeTab]);
 
+  // SDK loading check - wait for user email to be populated
+  // CRITICAL: Must wait for SDK to fully load before rendering
+  if (!user || !user.email) {
+    return (
+      <div className="ah-container ah-container--narrow" style={{ marginTop: '2rem' }}>
+        <div className="ah-card">
+          <div className="ah-flex-center-justify" style={{ padding: '2rem' }}>
+            <p className="ah-meta">Loading SDK...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Data loading check
+  if (loading) {
+    return (
+      <div className="ah-container ah-container--narrow" style={{ marginTop: '2rem' }}>
+        <div className="ah-card">
+          <div className="ah-flex-center-justify" style={{ padding: '2rem' }}>
+            <p className="ah-meta">Loading data...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Check authentication
+  if (user.isGuest) {
+    return (
+      <div className="ah-container ah-container--narrow" style={{ marginTop: '2rem' }}>
+        <div className="ah-card">
+          <h2 style={{ marginBottom: '1rem' }}>🎯 LMS Manager</h2>
+          <p className="ah-meta">
+            Authentication required. Please access this app through Activity Hub.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  // Check if user has any LMS role
+  if (accessibleTabs.length === 0) {
+    return (
+      <div className="ah-container ah-container--narrow" style={{ marginTop: '2rem' }}>
+        <div className="ah-card">
+          <h2 style={{ marginBottom: '1rem' }}>🎯 LMS Manager</h2>
+          <p className="ah-meta">
+            You don't have permission to access Last Man Standing.
+          </p>
+          <p className="ah-meta">
+            Contact an administrator to request access.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   // Reload data helpers (commented out for debugging)
   // const reloadGroups = async () => {
   //   try {
@@ -251,18 +251,6 @@ function App() {
   //     console.error('Failed to reload games:', err);
   //   }
   // };
-
-  if (loading) {
-    return (
-      <div className="ah-container ah-container--narrow" style={{ marginTop: '2rem' }}>
-        <div className="ah-card">
-          <div className="ah-flex-center-justify" style={{ padding: '2rem' }}>
-            <p className="ah-meta">Loading data...</p>
-          </div>
-        </div>
-      </div>
-    );
-  }
 
   console.log('About to render LMS with activeTab:', activeTab);
 
