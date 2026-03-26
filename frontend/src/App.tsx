@@ -16,15 +16,19 @@ function App() {
 
   // Get accessible tabs based on user roles
   // Tab hierarchy: setup (left) → games (middle) → reports (right)
-  // lms:setup grants access to all tabs
-  // lms:games grants access to games + reports
-  // lms:reports grants access to reports only (default role)
+  // lms-manager:setup grants access to all tabs
+  // lms-manager:games grants access to games + reports
+  // lms-manager:reports grants access to reports only (default role)
   const accessibleTabs = roles.getAccessibleTabs([...TAB_ORDER]);
 
-  // Set active tab to first accessible tab
-  const [activeTab, setActiveTab] = useState<TabName>(() => {
-    return (accessibleTabs[0] as TabName) || 'reports';
-  });
+  const [activeTab, setActiveTab] = useState<TabName>('reports');
+
+  // Update active tab when accessible tabs change
+  useEffect(() => {
+    if (accessibleTabs.length > 0 && !accessibleTabs.includes(activeTab)) {
+      setActiveTab(accessibleTabs[0] as TabName);
+    }
+  }, [accessibleTabs, activeTab]);
 
   // Shared state
   const [groups, setGroups] = useState<Group[]>([]);
@@ -41,8 +45,20 @@ function App() {
     });
   };
 
+  // SDK loading check - wait for user email to be populated
+  if (!user || !user.email) {
+    return (
+      <GameCard size="narrow">
+        <div className="ah-flex-center-justify ah-py-4">
+          <div className="ah-spinner"></div>
+          <p className="ah-ml-2">Loading...</p>
+        </div>
+      </GameCard>
+    );
+  }
+
   // Check authentication
-  if (!user || user.isGuest) {
+  if (user.isGuest) {
     return (
       <GameCard size="narrow">
         <h2 className="ah-card-title">🎯 LMS Manager</h2>
