@@ -23,14 +23,6 @@ function App() {
 
   const [activeTab, setActiveTab] = useState<TabName>('reports');
 
-  // Debug logging
-  console.log('LMS Debug:', {
-    user,
-    roles: roles.all,
-    accessibleTabs,
-    activeTab,
-  });
-
   // Update active tab when accessible tabs change
   useEffect(() => {
     if (accessibleTabs.length > 0 && !accessibleTabs.includes(activeTab)) {
@@ -102,21 +94,32 @@ function App() {
     const fetchData = async () => {
       try {
         const token = localStorage.getItem('token');
-        if (!token) return;
+        if (!token) {
+          setLoading(false);
+          return;
+        }
 
         // Fetch groups
         const groupsRes = await fetch(`${API_BASE}/api/groups`, {
           headers: { Authorization: `Bearer ${token}` },
         });
-        const groupsData = await groupsRes.json();
-        setGroups(groupsData.groups || []);
+        if (groupsRes.ok) {
+          const groupsData = await groupsRes.json();
+          setGroups(Array.isArray(groupsData.groups) ? groupsData.groups : []);
+        } else {
+          console.error('Failed to fetch groups:', groupsRes.status);
+        }
 
         // Fetch players
         const playersRes = await fetch(`${API_BASE}/api/players`, {
           headers: { Authorization: `Bearer ${token}` },
         });
-        const playersData = await playersRes.json();
-        setPlayers(playersData.players || []);
+        if (playersRes.ok) {
+          const playersData = await playersRes.json();
+          setPlayers(Array.isArray(playersData.players) ? playersData.players : []);
+        } else {
+          console.error('Failed to fetch players:', playersRes.status);
+        }
 
         setLoading(false);
       } catch (err) {
@@ -140,8 +143,12 @@ function App() {
         const res = await fetch(`${API_BASE}/api/games`, {
           headers: { Authorization: `Bearer ${token}` },
         });
-        const data = await res.json();
-        setGames(data.games || []);
+        if (res.ok) {
+          const data = await res.json();
+          setGames(Array.isArray(data.games) ? data.games : []);
+        } else {
+          console.error('Failed to fetch games:', res.status);
+        }
       } catch (err) {
         console.error('Failed to fetch games:', err);
       }
@@ -152,33 +159,51 @@ function App() {
 
   // Reload data helpers
   const reloadGroups = async () => {
-    const token = localStorage.getItem('token');
-    if (!token) return;
-    const res = await fetch(`${API_BASE}/api/groups`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    const data = await res.json();
-    setGroups(data.groups || []);
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) return;
+      const res = await fetch(`${API_BASE}/api/groups`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setGroups(Array.isArray(data.groups) ? data.groups : []);
+      }
+    } catch (err) {
+      console.error('Failed to reload groups:', err);
+    }
   };
 
   const reloadPlayers = async () => {
-    const token = localStorage.getItem('token');
-    if (!token) return;
-    const res = await fetch(`${API_BASE}/api/players`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    const data = await res.json();
-    setPlayers(data.players || []);
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) return;
+      const res = await fetch(`${API_BASE}/api/players`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setPlayers(Array.isArray(data.players) ? data.players : []);
+      }
+    } catch (err) {
+      console.error('Failed to reload players:', err);
+    }
   };
 
   const reloadGames = async () => {
-    const token = localStorage.getItem('token');
-    if (!token) return;
-    const res = await fetch(`${API_BASE}/api/games`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    const data = await res.json();
-    setGames(data.games || []);
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) return;
+      const res = await fetch(`${API_BASE}/api/games`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setGames(Array.isArray(data.games) ? data.games : []);
+      }
+    } catch (err) {
+      console.error('Failed to reload games:', err);
+    }
   };
 
   if (loading) {
