@@ -259,7 +259,7 @@ function App() {
         {/* Scrollable content area */}
         <div style={{ flex: '1 1 auto', overflow: 'auto', padding: '1rem' }}>
           {/* Setup Tab */}
-        {activeTab === 'setup' && (
+        {activeTab === 'setup' && Array.isArray(groups) && Array.isArray(players) && (
           <SetupTab
             groups={groups}
             players={players}
@@ -271,7 +271,7 @@ function App() {
         )}
 
         {/* Games List Tab */}
-        {activeTab === 'games' && !selectedGameId && (
+        {activeTab === 'games' && !selectedGameId && Array.isArray(games) && Array.isArray(groups) && Array.isArray(players) && (
           <GamesListTab
             games={games}
             groups={groups}
@@ -284,7 +284,7 @@ function App() {
         )}
 
         {/* Game Detail Tab */}
-        {activeTab === 'games' && selectedGameId && (
+        {activeTab === 'games' && selectedGameId && Array.isArray(players) && (
           <GameDetailTab
             gameId={selectedGameId}
             onBack={() => {
@@ -301,7 +301,7 @@ function App() {
         )}
 
           {/* Reports Tab */}
-          {activeTab === 'reports' && (
+          {activeTab === 'reports' && Array.isArray(games) && (
             <ReportsTab games={games} />
           )}
         </div>
