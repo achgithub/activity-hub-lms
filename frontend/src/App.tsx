@@ -255,10 +255,7 @@ function App() {
             {accessibleTabs.includes('games') && (
               <button
                 className={`ah-tab ${activeTab === 'games' ? 'active' : ''}`}
-                onClick={() => {
-                  setActiveTab('games');
-                  setSelectedGameId(null);
-                }}
+                onClick={() => setActiveTab('games')}
               >
                 Games
               </button>
