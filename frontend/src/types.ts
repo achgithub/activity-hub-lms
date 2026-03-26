@@ -75,4 +75,4 @@ export interface GameDetail {
 }
 
 // Activity Hub proxy path for LMS Manager
-export const API_BASE = '/api/apps/lms/proxy';
+export const API_BASE = '/api/apps/lms-manager/proxy';
