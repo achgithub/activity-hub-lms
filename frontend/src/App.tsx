@@ -62,7 +62,8 @@ function App() {
   }, [accessibleTabs, activeTab]);
 
   // SDK loading check - wait for user email to be populated
-  if (!user || !user.email) {
+  // CRITICAL: Must wait for SDK to fully load before rendering
+  if (!user || !user.email || loading) {
     return (
       <div className="ah-container ah-container--narrow" style={{ marginTop: '2rem' }}>
         <div className="ah-card">
@@ -105,12 +106,18 @@ function App() {
     );
   }
 
-  // Fetch initial data (groups, players)
+  // Fetch initial data (groups, players) - wait for SDK to load user first
   useEffect(() => {
+    // Only fetch data after SDK has loaded the user
+    if (!user.email) {
+      return; // SDK still loading, don't fetch yet
+    }
+
     const fetchData = async () => {
       try {
         const token = localStorage.getItem('token');
         if (!token) {
+          console.error('No token available after SDK loaded');
           setLoading(false);
           return;
         }
@@ -145,7 +152,7 @@ function App() {
     };
 
     fetchData();
-  }, []);
+  }, [user.email]); // Re-run when user.email becomes available
 
   // Fetch games when Games or Reports tab is active
   useEffect(() => {
