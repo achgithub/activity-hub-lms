@@ -12,7 +12,7 @@ type TabName = typeof TAB_ORDER[number];
 
 function App() {
   const { user, roles } = useActivityHubContext();
-  const [selectedGameId, setSelectedGameId] = useState<number | null>(null);
+  // const [selectedGameId, setSelectedGameId] = useState<number | null>(null);
 
   // Get accessible tabs based on user roles
   // Tab hierarchy: setup (left) → games (middle) → reports (right)
@@ -28,9 +28,8 @@ function App() {
   const [players, setPlayers] = useState<Player[]>([]);
   const [games, setGames] = useState<Game[]>([]);
   // const [groupTeams, setGroupTeams] = useState<Record<number, Team[]>>({});
-  const [collapsedCards, setCollapsedCards] = useState<Record<string, boolean>>({});
+  // const [collapsedCards, setCollapsedCards] = useState<Record<string, boolean>>({});
   const [loading, setLoading] = useState(true);
-  // const [selectedGameId, setSelectedGameId] = useState<number | null>(null);
 
   // const toggleCard = (cardName: string) => {
   //   setCollapsedCards({
