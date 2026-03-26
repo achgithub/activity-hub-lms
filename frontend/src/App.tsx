@@ -122,6 +122,8 @@ function App() {
 
   // Fetch initial data (groups, players) - wait for SDK to load user first
   useEffect(() => {
+    console.log('LMS: Data fetch effect triggered, user.email =', user.email);
+
     // Only fetch data after SDK has loaded the user
     if (!user.email) {
       console.log('LMS: Waiting for SDK to load user...');
@@ -138,6 +140,8 @@ function App() {
           return;
         }
 
+        console.log('LMS: Fetching groups and players...');
+
         // Fetch groups
         const groupsRes = await fetch(`${API_BASE}/api/groups`, {
           headers: { Authorization: `Bearer ${token}` },
@@ -145,6 +149,7 @@ function App() {
         if (groupsRes.ok) {
           const groupsData = await groupsRes.json();
           setGroups(Array.isArray(groupsData.groups) ? groupsData.groups : []);
+          console.log('LMS: Groups fetched:', groupsData.groups?.length || 0);
         } else {
           console.error('Failed to fetch groups:', groupsRes.status);
         }
@@ -156,6 +161,7 @@ function App() {
         if (playersRes.ok) {
           const playersData = await playersRes.json();
           setPlayers(Array.isArray(playersData.players) ? playersData.players : []);
+          console.log('LMS: Players fetched:', playersData.players?.length || 0);
         } else {
           console.error('Failed to fetch players:', playersRes.status);
         }
