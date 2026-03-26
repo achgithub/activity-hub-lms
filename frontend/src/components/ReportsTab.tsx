@@ -25,10 +25,16 @@ const ReportsTab: React.FC<ReportsTabProps> = ({ games }) => {
         const res = await fetch(`${API_BASE}/api/report/${reportGameId}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
-        const data = await res.json();
-        setReportData(data);
+        if (res.ok) {
+          const data = await res.json();
+          setReportData(data);
+        } else {
+          console.error('Failed to fetch report:', res.status);
+          setReportData(null);
+        }
       } catch (err) {
         console.error('Failed to fetch report:', err);
+        setReportData(null);
       }
     };
 
@@ -86,7 +92,7 @@ const ReportsTab: React.FC<ReportsTabProps> = ({ games }) => {
       </div>
 
       {/* Report Display */}
-      {reportGameId > 0 && reportData && (
+      {reportGameId > 0 && reportData && reportData.game && (
         <div className="mt-4">
           {/* Game Header */}
           <div className="ah-card">
@@ -100,9 +106,17 @@ const ReportsTab: React.FC<ReportsTabProps> = ({ games }) => {
                   fetch(`${API_BASE}/api/report/${reportGameId}`, {
                     headers: { Authorization: `Bearer ${token}` },
                   })
-                    .then(res => res.json())
+                    .then(res => {
+                      if (res.ok) {
+                        return res.json();
+                      }
+                      throw new Error(`HTTP ${res.status}`);
+                    })
                     .then(data => setReportData(data))
-                    .catch(err => console.error('Failed to refresh report:', err));
+                    .catch(err => {
+                      console.error('Failed to refresh report:', err);
+                      setReportData(null);
+                    });
                 }}
               >
                 🔄 Refresh
