@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { GameCard, useActivityHubContext } from 'activity-hub-sdk';
+import { useActivityHubContext } from 'activity-hub-sdk';
 import SetupTab from './components/SetupTab';
 import GamesListTab from './components/GamesListTab';
 import GameDetailTab from './components/GameDetailTab';
@@ -183,12 +183,13 @@ function App() {
 
   if (loading) {
     return (
-      <GameCard size="narrow">
-        <div className="ah-flex-center-justify ah-py-4">
-          <div className="ah-spinner"></div>
-          <p className="ah-ml-2">Loading...</p>
+      <div className="ah-container ah-container--narrow" style={{ marginTop: '2rem' }}>
+        <div className="ah-card">
+          <div className="ah-flex-center-justify" style={{ padding: '2rem' }}>
+            <p className="ah-meta">Loading...</p>
+          </div>
         </div>
-      </GameCard>
+      </div>
     );
   }
 
