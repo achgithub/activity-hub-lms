@@ -23,6 +23,22 @@ function App() {
 
   const [activeTab, setActiveTab] = useState<TabName>('reports');
 
+  // Debug logging
+  useEffect(() => {
+    console.log('LMS App State:', {
+      user,
+      rolesAll: roles.all,
+      accessibleTabs,
+      activeTab,
+      groups: groups.length,
+      players: players.length,
+      games: games.length,
+      groupsIsArray: Array.isArray(groups),
+      playersIsArray: Array.isArray(players),
+      gamesIsArray: Array.isArray(games),
+    });
+  }, [user, roles, accessibleTabs, activeTab, groups, players, games]);
+
   // Update active tab when accessible tabs change
   useEffect(() => {
     if (accessibleTabs.length > 0 && !accessibleTabs.includes(activeTab)) {
@@ -211,12 +227,14 @@ function App() {
       <div className="ah-container ah-container--narrow" style={{ marginTop: '2rem' }}>
         <div className="ah-card">
           <div className="ah-flex-center-justify" style={{ padding: '2rem' }}>
-            <p className="ah-meta">Loading...</p>
+            <p className="ah-meta">Loading data...</p>
           </div>
         </div>
       </div>
     );
   }
+
+  console.log('About to render LMS with activeTab:', activeTab);
 
   return (
     <div style={{ width: '100%', maxWidth: '64rem', margin: '0 auto', padding: '2rem 1rem' }}>
@@ -258,52 +276,13 @@ function App() {
 
         {/* Scrollable content area */}
         <div style={{ flex: '1 1 auto', overflow: 'auto', padding: '1rem' }}>
-          {/* Setup Tab */}
-        {activeTab === 'setup' && Array.isArray(groups) && Array.isArray(players) && (
-          <SetupTab
-            groups={groups}
-            players={players}
-            onGroupsChange={reloadGroups}
-            onPlayersChange={reloadPlayers}
-            collapsedCards={collapsedCards}
-            toggleCard={toggleCard}
-          />
-        )}
-
-        {/* Games List Tab */}
-        {activeTab === 'games' && !selectedGameId && Array.isArray(games) && Array.isArray(groups) && Array.isArray(players) && (
-          <GamesListTab
-            games={games}
-            groups={groups}
-            players={players}
-            onSelectGame={setSelectedGameId}
-            onGamesChange={reloadGames}
-            collapsedCards={collapsedCards}
-            toggleCard={toggleCard}
-          />
-        )}
-
-        {/* Game Detail Tab */}
-        {activeTab === 'games' && selectedGameId && Array.isArray(players) && (
-          <GameDetailTab
-            gameId={selectedGameId}
-            onBack={() => {
-              setSelectedGameId(null);
-              reloadGames();
-            }}
-            groupTeams={groupTeams}
-            setGroupTeams={setGroupTeams}
-            collapsedCards={collapsedCards}
-            toggleCard={toggleCard}
-            players={players}
-            onGamesChange={reloadGames}
-          />
-        )}
-
-          {/* Reports Tab */}
-          {activeTab === 'reports' && Array.isArray(games) && (
-            <ReportsTab games={games} />
-          )}
+          <div className="ah-card">
+            <h3>Active Tab: {activeTab}</h3>
+            <p>Groups: {groups.length} items</p>
+            <p>Players: {players.length} items</p>
+            <p>Games: {games.length} items</p>
+            <p>Tab components temporarily disabled for debugging</p>
+          </div>
         </div>
       </div>
     </div>
