@@ -45,6 +45,7 @@ function App() {
       rolesAll: roles.all,
       accessibleTabs,
       activeTab,
+      loading,
       groups: groups.length,
       players: players.length,
       games: games.length,
@@ -52,7 +53,7 @@ function App() {
       playersIsArray: Array.isArray(players),
       gamesIsArray: Array.isArray(games),
     });
-  }, [user, roles, accessibleTabs, activeTab, groups, players, games]);
+  }, [user, roles, accessibleTabs, activeTab, loading, groups, players, games]);
 
   // Update active tab when accessible tabs change
   useEffect(() => {
@@ -63,12 +64,25 @@ function App() {
 
   // SDK loading check - wait for user email to be populated
   // CRITICAL: Must wait for SDK to fully load before rendering
-  if (!user || !user.email || loading) {
+  if (!user || !user.email) {
     return (
       <div className="ah-container ah-container--narrow" style={{ marginTop: '2rem' }}>
         <div className="ah-card">
           <div className="ah-flex-center-justify" style={{ padding: '2rem' }}>
-            <p className="ah-meta">Loading...</p>
+            <p className="ah-meta">Loading SDK...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Data loading check
+  if (loading) {
+    return (
+      <div className="ah-container ah-container--narrow" style={{ marginTop: '2rem' }}>
+        <div className="ah-card">
+          <div className="ah-flex-center-justify" style={{ padding: '2rem' }}>
+            <p className="ah-meta">Loading data...</p>
           </div>
         </div>
       </div>
@@ -110,9 +124,11 @@ function App() {
   useEffect(() => {
     // Only fetch data after SDK has loaded the user
     if (!user.email) {
+      console.log('LMS: Waiting for SDK to load user...');
       return; // SDK still loading, don't fetch yet
     }
 
+    console.log('LMS: SDK loaded, fetching data...');
     const fetchData = async () => {
       try {
         const token = localStorage.getItem('token');
@@ -144,6 +160,7 @@ function App() {
           console.error('Failed to fetch players:', playersRes.status);
         }
 
+        console.log('LMS: Data fetched successfully, loading complete');
         setLoading(false);
       } catch (err) {
         console.error('Failed to fetch data:', err);
