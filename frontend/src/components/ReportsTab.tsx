@@ -96,32 +96,7 @@ const ReportsTab: React.FC<ReportsTabProps> = ({ games }) => {
         <div className="mt-4">
           {/* Game Header */}
           <div className="ah-card">
-            <div className="ah-flex-between mb-2">
-              <h2>{reportData.game.name}</h2>
-              <button
-                className="ah-btn-outline"
-                onClick={() => {
-                  const token = localStorage.getItem('token');
-                  if (!token) return;
-                  fetch(`${API_BASE}/api/report/${reportGameId}`, {
-                    headers: { Authorization: `Bearer ${token}` },
-                  })
-                    .then(res => {
-                      if (res.ok) {
-                        return res.json();
-                      }
-                      throw new Error(`HTTP ${res.status}`);
-                    })
-                    .then(data => setReportData(data))
-                    .catch(err => {
-                      console.error('Failed to refresh report:', err);
-                      setReportData(null);
-                    });
-                }}
-              >
-                🔄 Refresh
-              </button>
-            </div>
+            <h2 style={{ marginBottom: '0.5rem' }}>{reportData.game.name}</h2>
             <p className="ah-meta">
               Starting Players: {reportData.game.startingPlayers} | Status: {reportData.game.status}
               {reportData.game.winnerName && ` | Winner: ${reportData.game.winnerName}`}
