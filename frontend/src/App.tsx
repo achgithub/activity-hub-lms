@@ -267,26 +267,33 @@ function App() {
             <SetupTab
               groups={groups}
               players={players}
-              groupTeams={groupTeams}
-              setGroupTeams={setGroupTeams}
+              onGroupsChange={reloadGroups}
+              onPlayersChange={reloadPlayers}
               collapsedCards={collapsedCards}
               toggleCard={toggleCard}
-              reloadGroups={reloadGroups}
-              reloadPlayers={reloadPlayers}
             />
           )}
           {activeTab === 'games' && !selectedGameId && (
             <GamesListTab
               games={games}
+              groups={groups}
+              players={players}
               onSelectGame={setSelectedGameId}
-              reloadGames={reloadGames}
+              onGamesChange={reloadGames}
+              collapsedCards={collapsedCards}
+              toggleCard={toggleCard}
             />
           )}
           {activeTab === 'games' && selectedGameId && (
             <GameDetailTab
               gameId={selectedGameId}
               onBack={() => setSelectedGameId(null)}
-              reloadGames={reloadGames}
+              groupTeams={groupTeams}
+              setGroupTeams={setGroupTeams}
+              collapsedCards={collapsedCards}
+              toggleCard={toggleCard}
+              players={players}
+              onGamesChange={reloadGames}
             />
           )}
           {activeTab === 'reports' && (
