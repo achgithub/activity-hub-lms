@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useActivityHubContext } from 'activity-hub-sdk';
-import SetupTab from './components/SetupTab';
-import GamesListTab from './components/GamesListTab';
-import GameDetailTab from './components/GameDetailTab';
-import ReportsTab from './components/ReportsTab';
-import { Game, Group, Player, Team, API_BASE } from './types';
+// import SetupTab from './components/SetupTab';
+// import GamesListTab from './components/GamesListTab';
+// import GameDetailTab from './components/GameDetailTab';
+// import ReportsTab from './components/ReportsTab';
+import { Game, Group, Player, /*Team,*/ API_BASE } from './types';
 
 // Tab order defines privilege hierarchy (left = more privileges)
 const TAB_ORDER = ['setup', 'games', 'reports'] as const;
@@ -22,6 +22,22 @@ function App() {
   const accessibleTabs = roles.getAccessibleTabs([...TAB_ORDER]);
 
   const [activeTab, setActiveTab] = useState<TabName>('reports');
+
+  // Shared state
+  const [groups, setGroups] = useState<Group[]>([]);
+  const [players, setPlayers] = useState<Player[]>([]);
+  const [games, setGames] = useState<Game[]>([]);
+  // const [groupTeams, setGroupTeams] = useState<Record<number, Team[]>>({});
+  const [collapsedCards, setCollapsedCards] = useState<Record<string, boolean>>({});
+  const [loading, setLoading] = useState(true);
+  // const [selectedGameId, setSelectedGameId] = useState<number | null>(null);
+
+  // const toggleCard = (cardName: string) => {
+  //   setCollapsedCards({
+  //     ...collapsedCards,
+  //     [cardName]: !collapsedCards[cardName],
+  //   });
+  // };
 
   // Debug logging
   useEffect(() => {
@@ -45,21 +61,6 @@ function App() {
       setActiveTab(accessibleTabs[0] as TabName);
     }
   }, [accessibleTabs, activeTab]);
-
-  // Shared state
-  const [groups, setGroups] = useState<Group[]>([]);
-  const [players, setPlayers] = useState<Player[]>([]);
-  const [games, setGames] = useState<Game[]>([]);
-  const [groupTeams, setGroupTeams] = useState<Record<number, Team[]>>({});
-  const [collapsedCards, setCollapsedCards] = useState<Record<string, boolean>>({});
-  const [loading, setLoading] = useState(true);
-
-  const toggleCard = (cardName: string) => {
-    setCollapsedCards({
-      ...collapsedCards,
-      [cardName]: !collapsedCards[cardName],
-    });
-  };
 
   // SDK loading check - wait for user email to be populated
   if (!user || !user.email) {
@@ -173,54 +174,54 @@ function App() {
     fetchGames();
   }, [activeTab]);
 
-  // Reload data helpers
-  const reloadGroups = async () => {
-    try {
-      const token = localStorage.getItem('token');
-      if (!token) return;
-      const res = await fetch(`${API_BASE}/api/groups`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (res.ok) {
-        const data = await res.json();
-        setGroups(Array.isArray(data.groups) ? data.groups : []);
-      }
-    } catch (err) {
-      console.error('Failed to reload groups:', err);
-    }
-  };
+  // Reload data helpers (commented out for debugging)
+  // const reloadGroups = async () => {
+  //   try {
+  //     const token = localStorage.getItem('token');
+  //     if (!token) return;
+  //     const res = await fetch(`${API_BASE}/api/groups`, {
+  //       headers: { Authorization: `Bearer ${token}` },
+  //     });
+  //     if (res.ok) {
+  //       const data = await res.json();
+  //       setGroups(Array.isArray(data.groups) ? data.groups : []);
+  //     }
+  //   } catch (err) {
+  //     console.error('Failed to reload groups:', err);
+  //   }
+  // };
 
-  const reloadPlayers = async () => {
-    try {
-      const token = localStorage.getItem('token');
-      if (!token) return;
-      const res = await fetch(`${API_BASE}/api/players`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (res.ok) {
-        const data = await res.json();
-        setPlayers(Array.isArray(data.players) ? data.players : []);
-      }
-    } catch (err) {
-      console.error('Failed to reload players:', err);
-    }
-  };
+  // const reloadPlayers = async () => {
+  //   try {
+  //     const token = localStorage.getItem('token');
+  //     if (!token) return;
+  //     const res = await fetch(`${API_BASE}/api/players`, {
+  //       headers: { Authorization: `Bearer ${token}` },
+  //     });
+  //     if (res.ok) {
+  //       const data = await res.json();
+  //       setPlayers(Array.isArray(data.players) ? data.players : []);
+  //     }
+  //   } catch (err) {
+  //     console.error('Failed to reload players:', err);
+  //   }
+  // };
 
-  const reloadGames = async () => {
-    try {
-      const token = localStorage.getItem('token');
-      if (!token) return;
-      const res = await fetch(`${API_BASE}/api/games`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (res.ok) {
-        const data = await res.json();
-        setGames(Array.isArray(data.games) ? data.games : []);
-      }
-    } catch (err) {
-      console.error('Failed to reload games:', err);
-    }
-  };
+  // const reloadGames = async () => {
+  //   try {
+  //     const token = localStorage.getItem('token');
+  //     if (!token) return;
+  //     const res = await fetch(`${API_BASE}/api/games`, {
+  //       headers: { Authorization: `Bearer ${token}` },
+  //     });
+  //     if (res.ok) {
+  //       const data = await res.json();
+  //       setGames(Array.isArray(data.games) ? data.games : []);
+  //     }
+  //   } catch (err) {
+  //     console.error('Failed to reload games:', err);
+  //   }
+  // };
 
   if (loading) {
     return (
