@@ -23,6 +23,14 @@ function App() {
 
   const [activeTab, setActiveTab] = useState<TabName>('reports');
 
+  // Debug logging
+  console.log('LMS Debug:', {
+    user,
+    roles: roles.all,
+    accessibleTabs,
+    activeTab,
+  });
+
   // Update active tab when accessible tabs change
   useEffect(() => {
     if (accessibleTabs.length > 0 && !accessibleTabs.includes(activeTab)) {
@@ -48,39 +56,44 @@ function App() {
   // SDK loading check - wait for user email to be populated
   if (!user || !user.email) {
     return (
-      <GameCard size="narrow">
-        <div className="ah-flex-center-justify ah-py-4">
-          <div className="ah-spinner"></div>
-          <p className="ah-ml-2">Loading...</p>
+      <div className="ah-container ah-container--narrow" style={{ marginTop: '2rem' }}>
+        <div className="ah-card">
+          <div className="ah-flex-center-justify" style={{ padding: '2rem' }}>
+            <p className="ah-meta">Loading...</p>
+          </div>
         </div>
-      </GameCard>
+      </div>
     );
   }
 
   // Check authentication
   if (user.isGuest) {
     return (
-      <GameCard size="narrow">
-        <h2 className="ah-card-title">🎯 LMS Manager</h2>
-        <p className="ah-meta">
-          Authentication required. Please access this app through Activity Hub.
-        </p>
-      </GameCard>
+      <div className="ah-container ah-container--narrow" style={{ marginTop: '2rem' }}>
+        <div className="ah-card">
+          <h2 style={{ marginBottom: '1rem' }}>🎯 LMS Manager</h2>
+          <p className="ah-meta">
+            Authentication required. Please access this app through Activity Hub.
+          </p>
+        </div>
+      </div>
     );
   }
 
   // Check if user has any LMS role
   if (accessibleTabs.length === 0) {
     return (
-      <GameCard size="narrow">
-        <h2 className="ah-card-title">🎯 LMS Manager</h2>
-        <p className="ah-meta">
-          You don't have permission to access Last Man Standing.
-        </p>
-        <p className="ah-meta">
-          Contact an administrator to request access.
-        </p>
-      </GameCard>
+      <div className="ah-container ah-container--narrow" style={{ marginTop: '2rem' }}>
+        <div className="ah-card">
+          <h2 style={{ marginBottom: '1rem' }}>🎯 LMS Manager</h2>
+          <p className="ah-meta">
+            You don't have permission to access Last Man Standing.
+          </p>
+          <p className="ah-meta">
+            Contact an administrator to request access.
+          </p>
+        </div>
+      </div>
     );
   }
 
